@@ -2,12 +2,12 @@
 
 var setArrays = require('../lib/set-arrays'),
     setOpt = require('../lib/set-opt'),
-    flatten2dArray = require('../lib/flatten-2d-array'),
     extendFlat = require('../lib/extend-flat'),
     consts = require('../lib/consts');
 
-var ohlc = module.exports = {},
-    Factory = {};
+var ohlcFactory = require('./ohlc-factory');
+
+var ohlc = module.exports = {};
 
 /**
  * @param {object} data
@@ -16,26 +16,28 @@ var ohlc = module.exports = {},
  *
 **/
 ohlc.create = function(data, opts) {
-    var data = setArrays(data, ['open', 'high', 'low', 'clone'], ['dates']);
+    data = setArrays(data, ['open', 'high', 'low', 'close'], ['dates']);
     if(!data) return;
+    validateData(data);
     
+    if(opts === undefined) opts = {};
     var direction = setOpt(opts.direction,
         {dflt: 'both', values: ['increasing', 'decreasing']}
     );
+    delete opts.direction;  // direction isn't a plot option
 
-    var factory = new Factory(data);
+    var factory = new ohlcFactory(data),
+        traces = [];
 
-    var ohlcIncr, ohlcDecr;
-
-    if(['both', 'increasing'].indexOf(direction) !==-1) {
-        ohlcIncr = makeIncreasing(factory, opts);
+    if(['both', 'increasing'].indexOf(direction) !== -1) {
+        traces.push(makeIncreasing(factory, opts));
     }
-    if(['both', 'decreasing'].indexOf(direction) !==-1) {
-        ohlcDecr = makeDecreasing(factory, opts);
+    if(['both', 'decreasing'].indexOf(direction) !== -1) {
+        traces.push(makeDecreasing(factory, opts));
     }
 
     return {
-        data: [ohlcIncr, ohlcDecr],
+        data: traces,
         layout: {
             xaxis: { zeroline: false },
             hovermode: 'closest'
@@ -43,20 +45,34 @@ ohlc.create = function(data, opts) {
     };
 };
 
+function validateData(data) {
+    [data.open, data.low, data.close].forEach(function(array) {
+        data.high.forEach(function(highi, i) {
+            if(highi < array[i]) {
+                throw new Error([
+                    'Oops! Looks like some of your high values',
+                    'are less than the corresponding open,',
+                    'low, or close values.'
+                ].join(' '));
+            }
+        });
+    });
+
+    [data.open, data.high, data.close].forEach(function(array) {
+        data.low.forEach(function(lowi, i) {
+            if(lowi > array[i]) {
+                throw new Error([
+                    'Oops! Looks like some of your low values',
+                    'are greather than the corresponding open,', 
+                    'high, or close values.'
+                ].join(' '));
+            }
+        });
+    });
+}
+
 function makeIncreasing(factory, opts) {
     var incrData = factory.getIncrData();
-
-    var showLegend;
-
-    opts.name = setOpt(opts.name, {
-        dflt: 'Increasing'
-        ifUndefined: function() { showLegend = true; },
-        ifDefined : function() { showLegend = false; },
-    });
-    opts.line = setOpt(opts.line,
-        {dflt: {color: consts.DEFAULT_INCREASING_COLOR , width: 1}}
-    );
-    opts.text = setOpt(opts.text, {dflt: incrData.text});
 
     return extendFlat(
         {
@@ -64,7 +80,12 @@ function makeIncreasing(factory, opts) {
             mode: 'lines',
             x: incrData.x,
             y: incrData.y,
-            showlegend: showLegend
+            text: setOpt(opts.text, {dflt: incrData.text}),
+            name: setOpt(opts.name, {dflt: 'Increasing'}),
+            line: setOpt(opts.line,
+                {dflt: {color: consts.DEFAULT_INCREASING_COLOR , width: 1}}
+            ),
+            showlegend: opts.name!==undefined
         }, 
         opts
    );
@@ -73,128 +94,19 @@ function makeIncreasing(factory, opts) {
 function makeDecreasing(factory, opts) {
     var decrData = factory.getDecrData();
 
-    opts.line =setOpt(opts.line,
-        {dflt: {color: consts.DEFAULT_DECREASING_COLOR , width: 1}}
-    );
-    opts.text = setOpt(opts.text, {dflt: decrData.text});
-    opts.name = setOpt(opts.name, {dflt: 'Increasing'});
-    opts.showlegend = setOpt(opts.showlegend, {dflt: false, values: [true, false]});
-
     return extendFlat(
         {
             type: 'scatter',
             mode: 'lines',
             x: decrData.x,
-            y: decrData.y
+            y: decrData.y,
+            text: setOpt(opts.text, {dflt: decrData.text}),
+            name: setOpt(opts.name, {dflt: 'Decreasing'}),
+            line: setOpt(opts.line,
+                {dflt: {color: consts.DEFAULT_DECREASING_COLOR , width: 1}}
+            ),
+            showlegend: setOpt(opts.showlegend, {dflt: false, values: [true, false]})
         }, 
         opts
    );
 }
-
-function Factory(data) {
-    this.open = data.open;
-    this.high = data.high;
-    this.low = data.low;
-    this.close = data.close;
-    this.dates = data.dates;
-
-    this.len = this.open.length;
-    this.textSignature = ['Open', 'Open', 'High', 'Low', 'Close', 'Close', ''];
-    this.empty = new Array(this.len);
-
-    this.allX = [];
-    this.allY = [];
-    this.incrX = [];
-    this.incrY = [];
-    this.decrX = [];
-    this.decrY = [];
-
-    this.getAllXY();
-    this.seperateIncrDecr();
-}
-
-var FactoryProto = Factory.prototype;
-
-FactoryProto.getAllXY = function() {
-    var self = this,
-        dateDiff = [];
-
-    var dateDiffMin, i;
-
-    for(i = 0; i < self.len; i++) {
-        self.allY.push([
-            self.open[i],
-            self.open[i], self.high[i],
-            self.low[i], self.close[i],
-            self.close[i],
-            self.empty[i]
-        ]);
-    }
-
-    if(self.dates[0] instanceof Date) {
-        for(i = 0; i < self.len-1; i++) {
-            dateDiff.push(self.dates[i + 1] - self.dates[i]);
-        }
-        dateDiffMin = Math.min.apply(null, dateDiff) / 5;
-
-        self.dates.forEach(function(datei) {
-            self.allX.push([
-                datei - dateDiffMin,
-                datei, datei, datei, datei, datei,
-                datei + dateDiffMin, null
-            ]);
-        });
-    }
-    else {
-        self.open.forEach(function(openi) {
-            self.allX.push([
-                openi - 0.2,
-                openi, openi, openi, openi, openi,
-                openi + 0.2, null
-            ]);
-        });
-    }
-};
-
-FactoryProto.seperateIncrDecr = function() {
-    var self = this;
-
-    for(var i = 0; self.len; i++) {
-        if(self.close[i] === undefined) continue;
-
-        if(self.close[i] > self.open[i]) {
-            self.incrX.push(self.allX[i]);
-            self.incrY.push(self.allY[i]);
-        }
-        else {
-            self.decrX.push(self.allX[i]);
-            self.decrY.push(self.allY[i]);
-        }
-    }
-};
-
-FactoryProto.getIncrData = function() {
-    var self = this,
-        text = [];
-
-    self.incrX.forEach(function() { text.concat(self.textSignature); });
-
-    return {
-        x: flatten2dArray(self.incrX),
-        y: flatten2dArray(self.incrY),
-        text: text
-    };
-};
-
-FactoryProto.getDecrData = function() {
-    var self = this,
-        text = [];
-
-    self.decrX.forEach(function() { text.concat(self.textSignature); });
-
-    return {
-        x: flatten2dArray(self.decrX),
-        y: flatten2dArray(self.decrY),
-        text: text
-    };
-};
