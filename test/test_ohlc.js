@@ -107,6 +107,12 @@ tap.test('should output ohlc fig object - 3', function(t) {
 tap.test('should output ohlc fig object - 4', function(t) {
     t.plan(1);
 
+    function toDate(d) {
+        return d!== null ?
+            new Date(d[0], d[1]-1, d[2], d[3], d[4]).getTime() :
+            null;
+    }
+
     var fig = ohlc.create(
         {
             open: [33.01, 33.31, 33.50, 32.06, 34.12, 33.05, 33.31, 33.50],
@@ -119,12 +125,6 @@ tap.test('should output ohlc fig object - 4', function(t) {
             ].map(function(d) { return new Date(d[0], d[1]-1, d[2]); })
         }
     );
-
-    function toDate(d) {
-        return d!== null ?
-            new Date(d[0], d[1]-1, d[2], d[3], d[4]).getTime() :
-            null;
-    }
 
     var expected = {
         data: [
