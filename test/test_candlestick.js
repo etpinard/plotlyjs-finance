@@ -2,12 +2,12 @@
 
 var tap = require('tap');
 
-var candlestick = require('../src/candlestick');
+var createCandlestick = require('../src/candlestick');
 
 tap.test('should output candlestick fig object - 1', function(t) {
     t.plan(1);
 
-    var fig = candlestick.create(
+    var fig = createCandlestick(
         { open: [33.0], high: [33.2], low: [32.7], close: [33.1] }
     );
 
@@ -75,14 +75,15 @@ tap.test('should output candlestick fig object - 1', function(t) {
         layout: {
             barmode: 'stack',
             bargroupgap: 0.2,
+            xaxis: { type: 'linear' },
             yaxis: { 
                 fixedrange: true,
-                range: [32.65, 33.25]
+                range: [32.650000000000006, 33.25]
             }
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });
 
 tap.test('should output candlestick fig object - 2', function(t) {
@@ -94,7 +95,7 @@ tap.test('should output candlestick fig object - 2', function(t) {
             null;
     }
 
-    var fig = candlestick.create(
+    var fig = createCandlestick(
         {
             open: [33.01, 33.31, 33.50, 32.06, 34.12, 33.05, 33.31, 33.50],
             high: [34.20, 34.37, 33.62, 34.25, 35.18, 33.25, 35.37, 34.62],
@@ -218,6 +219,7 @@ tap.test('should output candlestick fig object - 2', function(t) {
         layout: {
             barmode: 'stack',
             bargroupgap: 0.2,
+            xaxis: { type: 'date' },
             yaxis: { 
                 fixedrange: true,
                 range: [30.288, 35.831999999999994]
@@ -225,5 +227,5 @@ tap.test('should output candlestick fig object - 2', function(t) {
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });

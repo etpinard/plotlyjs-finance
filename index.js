@@ -1,2 +1,2 @@
-exports.ohlc = require('./src/ohlc');
-exports.candlestick = require('./src/candlestick');
+exports.createOHLC = require('./src/ohlc');
+exports.createCandlestick = require('./src/candlestick');

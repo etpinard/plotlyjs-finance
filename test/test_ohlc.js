@@ -2,12 +2,12 @@
 
 var tap = require('tap');
 
-var ohlc = require('../src/ohlc');
+var createOHLC = require('../src/ohlc');
 
 tap.test('should output ohlc fig object - 1', function(t) {
     t.plan(1);
 
-    var fig = ohlc.create(
+    var fig = createOHLC(
         { open: [33.0], high: [33.2], low: [32.7], close: [33.1] }
     );
 
@@ -35,18 +35,21 @@ tap.test('should output ohlc fig object - 1', function(t) {
             }
         ],
         layout: {
-            xaxis: { zeroline: false},
+            xaxis: {
+                type: 'linear',
+                zeroline: false
+            },
             hovermode: 'closest'
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });
 
 tap.test('should output ohlc fig object - 2', function(t) {
     t.plan(1);
 
-    var fig = ohlc.create(
+    var fig = createOHLC(
         { open: [33.0], high: [33.2], low: [32.7], close: [33.1] },
         { direction: 'increasing' }
     );
@@ -65,19 +68,22 @@ tap.test('should output ohlc fig object - 2', function(t) {
             }
         ],
         layout: {
-            xaxis: { zeroline: false},
+            xaxis: {
+                type: 'linear',
+                zeroline: false
+            },
             hovermode: 'closest'
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });
 
 
 tap.test('should output ohlc fig object - 3', function(t) {
     t.plan(1);
 
-    var fig = ohlc.create(
+    var fig = createOHLC(
         { open: [33.0], high: [33.2], low: [30.7], close: [31.1] },
         { direction: 'decreasing' }
     );
@@ -96,12 +102,15 @@ tap.test('should output ohlc fig object - 3', function(t) {
             }
         ],
         layout: {
-            xaxis: { zeroline: false},
+            xaxis: {
+                type: 'linear',
+                zeroline: false
+            },
             hovermode: 'closest'
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });
 
 tap.test('should output ohlc fig object - 4', function(t) {
@@ -113,7 +122,7 @@ tap.test('should output ohlc fig object - 4', function(t) {
             null;
     }
 
-    var fig = ohlc.create(
+    var fig = createOHLC(
         {
             open: [33.01, 33.31, 33.50, 32.06, 34.12, 33.05, 33.31, 33.50],
             high: [34.20, 34.37, 33.62, 34.25, 35.18, 33.25, 35.37, 34.62],
@@ -188,10 +197,13 @@ tap.test('should output ohlc fig object - 4', function(t) {
             }
         ],
         layout: {
-            xaxis: { zeroline: false},
+            xaxis: {
+                type: 'date',
+                zeroline: false
+            },
             hovermode: 'closest'
         }
     };
 
-    t.same(fig.data, expected.data);
+    t.same(fig, expected);
 });

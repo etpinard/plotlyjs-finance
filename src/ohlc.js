@@ -8,19 +8,17 @@ var setArrays = require('../lib/set-arrays'),
 var ohlcFactory = require('./ohlc-factory'),
     validateData = require('./validate-data');
 
-var ohlc = module.exports = {};
-
 /**
  * @param {object} data
  * @param {string} direction
  * @param {object} opts
  *
 **/
-ohlc.create = function(data, opts) {
+module.exports = function createOHLC(data, opts) {
     data = setArrays(data, ['open', 'high', 'low', 'close'], ['dates']);
     if(!data) return;
     validateData(data);
-    
+
     if(opts === undefined) opts = {};
     var direction = setOpt(opts.direction,
         {dflt: 'both', values: ['increasing', 'decreasing']}
@@ -40,7 +38,11 @@ ohlc.create = function(data, opts) {
     return {
         data: traces,
         layout: {
-            xaxis: { zeroline: false },
+            xaxis: {
+                type: data.dates[0] instanceof Date ?
+                    'date' : 'linear',
+                zeroline: false
+            },
             hovermode: 'closest'
         }
     };
@@ -61,7 +63,7 @@ function makeIncreasing(factory, opts) {
                 {dflt: {color: consts.DEFAULT_INCREASING_COLOR, width: 1}}
             ),
             showlegend: opts.name!==undefined
-        }, 
+        },
         opts
    );
 }
@@ -81,7 +83,7 @@ function makeDecreasing(factory, opts) {
                 {dflt: {color: consts.DEFAULT_DECREASING_COLOR, width: 1}}
             ),
             showlegend: setOpt(opts.showlegend, {dflt: false, values: [true, false]})
-        }, 
+        },
         opts
    );
 }

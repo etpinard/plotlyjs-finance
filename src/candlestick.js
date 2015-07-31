@@ -8,15 +8,13 @@ var setArrays = require('../lib/set-arrays'),
 var candlestickFactory = require('./candlestick-factory'),
     validateData = require('./validate-data');
 
-var candlestick = module.exports = {};
-
 /**
  * @param {object} data
  * @param {string} direction
  * @param {object} opts
  *
 **/
-candlestick.create = function(data, opts) {
+module.exports = function createCandlestick(data, opts) {
     data = setArrays(data, ['open', 'high', 'low', 'close'], ['dates']);
     if(!data) return;
     validateData(data);
@@ -42,6 +40,10 @@ candlestick.create = function(data, opts) {
         layout: {
             barmode: 'stack',
             bargroupgap: 0.2,
+            xaxis: {
+                type: data.dates[0] instanceof Date ?
+                    'date' : 'linear'
+            },
             yaxis: {
                 range: getYAxisRange(data),
                 fixedrange: true
@@ -145,8 +147,8 @@ function makeDecreasing(factory, opts) {
 }
 
 function getYAxisRange(data) {
-    var minLow = Math.min(data.low),
-        maxHigh = Math.max(data.high),
+    var minLow = Math.min.apply(null, data.low),
+        maxHigh = Math.max.apply(null, data.high),
         diff = maxHigh-minLow;
     return [minLow - 0.1*diff, maxHigh + 0.1*diff];
 }
