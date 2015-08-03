@@ -11,6 +11,14 @@
     "type": "git",
     "url": "git://github.com/etpinard/plotlyjs-finance.git"
   },
+  "keywords": [
+    "plotting",
+    "graphs",
+    "interactive",
+    "data",
+    "visualization",
+    "plotly"
+  ],
   "author": "Étienne Tétreault-Pinard",
   "license": "MIT",
   "bugs": {
