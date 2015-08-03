@@ -4,7 +4,7 @@
   "description": "plotly.js finance chart wrapper",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/*.js",
+    "test": "tap tests/*.js",
     "build": "node_modules/browserify/bin/cmd.js index.js -s PlotlyFinance | node_modules/uglify-js/bin/uglifyjs -c -m -o plotlyjs-finance.js"
   },
   "repository": {
