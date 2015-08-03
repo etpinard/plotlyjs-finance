@@ -10,9 +10,11 @@ var ohlcFactory = require('./ohlc-factory'),
 
 /**
  * @param {object} data
- * @param {string} direction
+ *  with numeric arrays linked to keys 'open', 'high', 'low', 'close`
+ *  and optionally an array of dates linked to 'dates'
  * @param {object} opts
- *
+ *  plotlyjs trace options and/or
+ *  'direction' set to 'both' (the default), 'increasing' or 'decreasing'
 **/
 module.exports = function createOHLC(data, opts) {
     data = setArrays(data, ['open', 'high', 'low', 'close'], ['dates']);
@@ -23,7 +25,7 @@ module.exports = function createOHLC(data, opts) {
     var direction = setOpt(opts.direction,
         {dflt: 'both', values: ['increasing', 'decreasing']}
     );
-    delete opts.direction;  // direction isn't a plot option
+    delete opts.direction;  // direction isn't a plotlyjs option
 
     var factory = new ohlcFactory(data),
         traces = [];

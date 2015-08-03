@@ -1,5 +1,3 @@
-'use strict';
-
 var flatten2dArray = require('../lib/flatten-2d-array');
 
 function ohlcFactory(data) {

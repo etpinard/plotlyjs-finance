@@ -1,5 +1,3 @@
-'use strict';
-
 function candlestickFactory(data) {
     this.open = data.open;
     this.high = data.high;
