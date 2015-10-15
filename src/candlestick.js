@@ -31,10 +31,10 @@ module.exports = function createCandlestick(data, opts) {
         traces = [];
 
     if(['both', 'increasing'].indexOf(direction) !== -1) {
-        traces = traces.concat(makeIncreasing(factory, opts));
+        traces.push(makeIncreasing(factory, opts));
     }
     if(['both', 'decreasing'].indexOf(direction) !== -1) {
-        traces = traces.concat(makeDecreasing(factory, opts));
+        traces.push(makeDecreasing(factory, opts));
     }
 
     return {
@@ -55,50 +55,24 @@ module.exports = function createCandlestick(data, opts) {
 };
 
 function makeIncreasing(factory, opts) {
-    var incrData = factory.getIncrData(),
-        groupName = 'Increasing';
+    var incrData = factory.getIncrData();
 
-    return [
+    return extendFlat(
         {
-            type: 'bar',
+            type: 'box',
             x: incrData.x,
-            y: incrData.open,
-            marker: { color: consts.TRANSPARENT },
-            legendgroup: groupName,
-            showlegend: false,
-            hoverinfo: 'none'
+            y: incrData.y,
+            name: setOpt(opts.name, {dflt: 'Increasing'}),
+            line: setOpt(opts.line,
+                {dflt: {color: consts.DEFAULT_INCREASING_COLOR, width: 1}}
+            ),
+            fillcolor: setOpt(opts.fillcolor, {dflt: (opts.line || {}).color}),
+            whiskerwidth: 0,
+            boxpoints: false,
+            showlegend: setOpt(opts.name, {dflt: opts.name!==undefined})
         },
-        extendFlat(
-            {
-                type: 'bar',
-                x: incrData.x,
-                y: incrData.diff,
-                legendgroup: groupName,
-                marker: setOpt(opts.marker,
-                    {dflt: {color: consts.DEFAULT_INCREASING_COLOR}}
-                ),
-                showlegend: false,
-                hoverinfo: 'none'
-            },
-            opts
-        ),
-        extendFlat(
-            {
-                type: 'scatter',
-                mode: 'lines',
-                x: incrData.xStick,
-                y: incrData.yStick,
-                text: setOpt(opts.text, {dflt: incrData.text}),
-                name: setOpt(opts.name, {dflt: groupName}),
-                legendgroup: groupName,
-                line: setOpt(opts.line,
-                    {dflt: {color: consts.DEFAULT_INCREASING_COLOR}}
-                ),
-                showlegend: opts.name!==undefined
-            },
-            opts
-        )
-    ];
+        opts
+    );
 }
 
 function makeDecreasing(factory, opts) {
