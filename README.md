@@ -22,17 +22,13 @@ npm install plotlyjs-finance
 
 ### Examples
 
-HTML page (more info on the [plotlyjs homepage](https://plot.ly/javascript-graphing-library/)):
+HTML page (more info on the [plotlyjs homepage](https://plot.ly/javascript/)):
 
 ```html
 <!DOCTYPE html>
 <head>
-    <!-- D3.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <!-- Plotly.js -->
-    <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- PlotlyFinance -->
     <script src="https://cdn.rawgit.com/etpinard/plotlyjs-finance/master/plotlyjs-finance.js"></script>
 </head>
